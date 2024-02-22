@@ -1,0 +1,89 @@
+import heapq
+
+class PuzzleNode:
+    def _init_(self, state, parent=None, move=None, depth=0):
+        self.state = state
+        self.parent = parent
+        self.move = move
+        self.depth = depth
+        self.cost = self.calculate_cost()
+
+    def _lt_(self, other):
+        return self.cost < other.cost
+
+    def calculate_cost(self):
+        cost = self.depth
+        # Calculate the Manhattan distance
+        for i in range(3):
+            for j in range(3):
+                if self.state[i][j] != 0:
+                    goal_x = (self.state[i][j] - 1) // 3
+                    goal_y = (self.state[i][j] - 1) % 3
+                    cost += abs(i - goal_x) + abs(j - goal_y)
+        return cost
+
+    def get_children(self):
+        children = []
+        zero_pos = self.get_zero_position()
+        moves = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        for move in moves:
+            new_x = zero_pos[0] + move[0]
+            new_y = zero_pos[1] + move[1]
+            if 0 <= new_x < 3 and 0 <= new_y < 3:
+                new_state = [row[:] for row in self.state]
+                new_state[zero_pos[0]][zero_pos[1]] = new_state[new_x][new_y]
+                new_state[new_x][new_y] = 0
+                children.append(PuzzleNode(new_state, self, move, self.depth + 1))
+        return children
+
+    def get_zero_position(self):
+        for i in range(3):
+            for j in range(3):
+                if self.state[i][j] == 0:
+                    return (i, j)
+
+    def get_solution_path(self):
+        path = []
+        current_node = self
+        while current_node:
+            path.append(current_node)
+            current_node = current_node.parent
+        path.reverse()
+        return path
+
+def solve_puzzle(initial_state):
+    open_list = []
+    closed_set = set()
+    initial_node = PuzzleNode(initial_state)
+    heapq.heappush(open_list, initial_node)
+
+    while open_list:
+        current_node = heapq.heappop(open_list)
+        if current_node.state == [[1, 2, 3], [4, 5, 6], [7, 8, 0]]:
+            return current_node.get_solution_path()
+        closed_set.add(tuple(map(tuple, current_node.state)))
+        children = current_node.get_children()
+        for child in children:
+            if tuple(map(tuple, child.state)) not in closed_set:
+                heapq.heappush(open_list, child)
+    return None
+
+def print_solution(path):
+    for i in range(len(path)):
+        print("Step:", i)
+        for row in path[i].state:
+            print(row)
+        print()
+
+if "_name_" == "_main_":
+    initial_state = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [0, 7, 8]
+    ]
+    solution_path = solve_puzzle(initial_state)
+    if solution_path:
+        print("Solution found!")
+        print_solution(solution_path)
+    else:
+        print("No solution found.")
