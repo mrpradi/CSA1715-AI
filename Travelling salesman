@@ -1,0 +1,43 @@
+import itertools
+
+def tsp_brute_force(graph, start):
+    # Generate all possible permutations of cities
+    all_cities = list(graph.keys())
+    permutations = itertools.permutations(all_cities)
+
+    min_distance = float('inf')
+    optimal_path = None
+
+    # Iterate through all permutations and calculate total distance
+    for path in permutations:
+        if path[0] != start:
+            continue
+
+        distance = 0
+        current_city = start
+        for next_city in path:
+            distance += graph[current_city][next_city]
+            current_city = next_city
+        distance += graph[current_city][start]  # return to start
+
+        # Update minimum distance and optimal path if found a shorter path
+        if distance < min_distance:
+            min_distance = distance
+            optimal_path = path + (start,)
+
+    return min_distance, optimal_path
+
+# Example graph representing distances between cities
+graph = {
+    'A': {'A': 0, 'B': 10, 'C': 15, 'D': 20},
+    'B': {'A': 10, 'B': 0, 'C': 35, 'D': 25},
+    'C': {'A': 15, 'B': 35, 'C': 0, 'D': 30},
+    'D': {'A': 20, 'B': 25, 'C': 30, 'D': 0}
+}
+
+start_city = 'A'
+
+min_distance, optimal_path = tsp_brute_force(graph, start_city)
+
+print("Minimum distance:", min_distance)
+print("Optimal path:", optimal_path)
