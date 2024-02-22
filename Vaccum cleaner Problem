@@ -1,0 +1,52 @@
+class VacuumCleaner:
+    def _init_(self, initial_location='A'):
+        self.location = initial_location
+        self.status = 'Clean'
+    
+    def move(self, location):
+        print(f"Moving from {self.location} to {location}.")
+        self.location = location
+    
+    def clean(self):
+        print(f"Cleaning {self.location}...")
+        self.status = 'Clean'
+    
+    def is_dirty(self):
+        return self.status == 'Dirty'
+
+def main():
+    # Instantiate a vacuum cleaner starting at location A
+    vacuum = VacuumCleaner()
+
+    # Environment locations
+    locations = ['A', 'B']
+
+    # Environment status (dirty or clean)
+    status = {
+        'A': 'Dirty',
+        'B': 'Clean'
+    }
+
+    # Main loop to clean the environment
+    while any(status.values()):
+        # Check if current location is dirty, clean if necessary
+        if vacuum.is_dirty():
+            vacuum.clean()
+        
+        # Move to the next location
+        next_location = [loc for loc in locations if loc != vacuum.location and status[loc] == 'Dirty']
+        if next_location:
+            vacuum.move(next_location[0])
+        else:
+            next_location = [loc for loc in locations if loc != vacuum.location and status[loc] == 'Clean']
+            if next_location:
+                vacuum.move(next_location[0])
+            else:
+                print("No dirty location found. Exiting...")
+                break
+
+        # Update the status of the current location
+        status[vacuum.location] = 'Clean'
+
+if "_name" == "main_":
+    main()
