@@ -1,0 +1,87 @@
+from collections import deque
+
+class State:
+    def _init_(self, x, y, action=None):
+        self.x = x
+        self.y = y
+        self.action = action
+
+    def _repr_(self):
+        return f"({self.x}, {self.y})"
+
+def water_jug_problem(x_cap, y_cap, target):
+    visited = set()
+    queue = deque([State(0, 0)])
+    visited.add((0, 0))
+
+    while queue:
+        current_state = queue.popleft()
+
+        # Check if target state is reached
+        if current_state.x == target or current_state.y == target:
+            actions = []
+            while current_state.action:
+                actions.append(current_state.action)
+                current_state = current_state.action
+            actions.reverse()
+            return actions
+
+        # Empty jug x
+        if current_state.x != 0:
+            if (0, current_state.y) not in visited:
+                queue.append(State(0, current_state.y, current_state))
+                visited.add((0, current_state.y))
+
+        # Empty jug y
+        if current_state.y != 0:
+            if (current_state.x, 0) not in visited:
+                queue.append(State(current_state.x, 0, current_state))
+                visited.add((current_state.x, 0))
+
+        # Fill jug x
+        if current_state.x != x_cap:
+            if (x_cap, current_state.y) not in visited:
+                queue.append(State(x_cap, current_state.y, current_state))
+                visited.add((x_cap, current_state.y))
+
+        # Fill jug y
+        if current_state.y != y_cap:
+            if (current_state.x, y_cap) not in visited:
+                queue.append(State(current_state.x, y_cap, current_state))
+                visited.add((current_state.x, y_cap))
+
+        # Pour from jug x to jug y
+        if current_state.x > 0 and current_state.y < y_cap:
+            pour_amount = min(current_state.x, y_cap - current_state.y)
+            new_x = current_state.x - pour_amount
+            new_y = current_state.y + pour_amount
+            if (new_x, new_y) not in visited:
+                queue.append(State(new_x, new_y, current_state))
+                visited.add((new_x, new_y))
+
+        # Pour from jug y to jug x
+        if current_state.y > 0 and current_state.x < x_cap:
+            pour_amount = min(current_state.y, x_cap - current_state.x)
+            new_x = current_state.x + pour_amount
+            new_y = current_state.y - pour_amount
+            if (new_x, new_y) not in visited:
+                queue.append(State(new_x, new_y, current_state))
+                visited.add((new_x, new_y))
+
+    return None
+
+def main():
+    x_capacity = 4
+    y_capacity = 3
+    target_volume = 2
+
+    actions = water_jug_problem(x_capacity, y_capacity, target_volume)
+    if actions:
+        print(f"Steps to measure {target_volume} liters:")
+        for action in actions:
+            print(action)
+    else:
+        print("No solution exists.")
+
+if _name_ == "_main_":
+    main()
