@@ -1,0 +1,47 @@
+class CSP:
+    def __init__(self, variables, domains, constraints):
+        self.variables = variables
+        self.domains = domains
+        self.constraints = constraints
+
+    def consistent(self, variable, assignment):
+        for neighbor in self.constraints.get(variable, []):
+            if neighbor in assignment:
+                if assignment[neighbor] == assignment[variable]:
+                    return False
+        return True
+
+    def backtracking_search(self, assignment={}):
+        if len(assignment) == len(self.variables):
+            return assignment
+
+        unassigned = [v for v in self.variables if v not in assignment]
+        first_unassigned = unassigned[0]
+
+        for value in self.domains[first_unassigned]:
+            new_assignment = assignment.copy()
+            new_assignment[first_unassigned] = value
+
+            if self.consistent(first_unassigned, new_assignment):
+                result = self.backtracking_search(new_assignment)
+                if result:
+                    return result
+        return None
+
+
+# Example usage
+variables = ['WA', 'NT', 'SA', 'Q', 'NSW', 'V', 'T']
+domains = {v: ['R', 'G', 'B'] for v in variables}
+constraints = {
+    'WA': ['NT', 'SA'],
+    'NT': ['WA', 'SA', 'Q'],
+    'SA': ['WA', 'NT', 'Q', 'NSW', 'V'],
+    'Q': ['NT', 'SA', 'NSW'],
+    'NSW': ['SA', 'Q', 'V'],
+    'V': ['SA', 'NSW'],
+    'T': []
+}
+
+map_coloring = CSP(variables, domains, constraints)
+solution = map_coloring.backtracking_search()
+print(solution)
