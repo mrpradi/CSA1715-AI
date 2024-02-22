@@ -1,0 +1,79 @@
+from collections import deque
+
+# State representation: (left_bank_missionaries, left_bank_cannibals, boat_position)
+# Initial state: (3, 3, 1)
+# Goal state: (0, 0, 0)
+
+def is_valid_state(state):
+    # Check if the state is valid
+    left_m, left_c, boat = state
+    right_m = 3 - left_m
+    right_c = 3 - left_c
+
+    if left_m < 0 or left_m > 3 or right_m < 0 or right_m > 3:
+        return False
+    if left_c < 0 or left_c > 3 or right_c < 0 or right_c > 3:
+        return False
+    if left_m > 0 and left_c > left_m:
+        return False
+    if right_m > 0 and right_c > right_m:
+        return False
+    return True
+
+def is_goal_state(state):
+    return state == (0, 0, 0)
+
+def get_next_states(state):
+    # Generate next possible valid states
+    moves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]
+    valid_moves = []
+    left_m, left_c, boat = state
+
+    if boat == 1:
+        for move in moves:
+            new_state = (left_m - move[0], left_c - move[1], 0)
+            if is_valid_state(new_state):
+                valid_moves.append(new_state)
+    else:
+        for move in moves:
+            new_state = (left_m + move[0], left_c + move[1], 1)
+            if is_valid_state(new_state):
+                valid_moves.append(new_state)
+    return valid_moves
+
+def bfs():
+    start_state = (3, 3, 1)
+    visited = set()
+    queue = deque([(start_state, [])])
+
+    while queue:
+        state, path = queue.popleft()
+        visited.add(state)
+
+        if is_goal_state(state):
+            return path + [state]
+
+        for next_state in get_next_states(state):
+            if next_state not in visited:
+                queue.append((next_state, path + [state]))
+                visited.add(next_state)
+
+    return None
+
+def print_solution(path):
+    for i, state in enumerate(path):
+        left_m, left_c, boat = state
+        right_m = 3 - left_m
+        right_c = 3 - left_c
+        print(f"Step {i}: Left Bank: {left_m}M-{left_c}C | Right Bank: {right_m}M-{right_c}C | Boat: {'Left' if boat == 1 else 'Right'}")
+
+def main():
+    solution = bfs()
+    if solution:
+        print("Solution found:")
+        print_solution(solution)
+    else:
+        print("No solution found.")
+
+if "name" == "main":
+    main()
